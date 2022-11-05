@@ -58,9 +58,13 @@ def display_lives():
         startX += 50
 
 
-def show_hp(x, y):
-    health = font.render("Health: " + str(enemy_hp), True, (255, 255, 255))
-    screen.blit(health, (x, y))
+def show_hp():
+    health = font.render("Boss Health", True, (255, 255, 255))
+    red = (200, 60, 60)
+    screen.blit(health, (500, 10))
+    #display_health = int(health/100*200)
+    pygame.draw.rect(screen, (255, 255, 255), (495, 45, 260, 35))
+    pygame.draw.rect(screen, red, (500,50,enemy_hp/100*250,25))
 
 
 def player(x, y):
@@ -127,7 +131,7 @@ while running:
     clock.tick(120)
     screen.fill((0, 0, 0))
 
-   # screen.blit(bg, (0,0))
+    # screen.blit(bg, (0,0))
     obstacle_speed = 10
     obs = 0
     y_change = 0
@@ -144,7 +148,7 @@ while running:
           enemySpeed_x = random.randrange(2, 8) * enemyDirection
           enemySpeed_y = random.randrange(2, 8) * enemyDirection
 
-    if enemyY <= 0 or enemyY >= 1:
+    if enemyY <= 70 or enemyY >= 150:
       enemyDirection *= -1
       enemySpeed_x = random.randrange(0, 8) * enemyDirection
       enemySpeed_y = random.randrange(4, 8) * enemyDirection
@@ -162,13 +166,13 @@ while running:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                playerX_change = -4
+                playerX_change = -6
             if event.key == pygame.K_d:
-                playerX_change = 4
+                playerX_change = 6
             if event.key == pygame.K_w:
-                playerY_change = -4
+                playerY_change = -6
             if event.key == pygame.K_s:
-                playerY_change = 4
+                playerY_change = 6
             if event.key == pygame.K_SPACE:
                 fire_bullet(playerX + 3 * playerX_change,
                             playerY + 2 * playerY_change)
@@ -206,13 +210,13 @@ while running:
         bullet_state = "ready"
     player(playerX, playerY)
     enemy(enemyX, enemyY)
-    show_hp(textX, textY)
+    show_hp()
     display_lives()
 
     #asteroid position
     asteroid_ob(a_x, a_y)
 
-    test = 0
+    
     obstacle(obs_startx, obs_starty)
     obs_starty += obstacle_speed
 
