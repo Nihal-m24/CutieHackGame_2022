@@ -7,7 +7,7 @@ pygame.mixer.init()
 
 screen = pygame.display.set_mode((800, 800))
 bg = pygame.image.load("background.png")
-
+# screen.draw.text("hello world", (100, 100), color=(200, 200, 200), background="gray")
 pygame.display.set_caption("Citrus Invaders")
 
 icon = pygame.image.load("orange.png")
@@ -15,10 +15,14 @@ pygame.display.set_icon(icon)
 
 #Sound
 shooting_sound = pygame.mixer.Sound("shooting_effect.wav")
+win_sound = pygame.mixer.Sound("win_sound.wav")
+loss_sound = pygame.mixer.Sound("loss_sound.mp3")
 
 #MOVING THE SPACESHIP
 clock = pygame.time.Clock()
 enemyDirection = 1
+enemyDirection_y = -1
+
 enemySpeed_x = 5
 enemySpeed_y = 4
 
@@ -46,7 +50,7 @@ font = pygame.font.Font('freesansbold.ttf', 32)
 textX = 10
 textY = 10
 
-lives = 5
+lives = 10
 livesImg = pygame.image.load('lives.png')
 
 
@@ -65,7 +69,7 @@ def show_hp():
     screen.blit(health, (500, 10))
     #display_health = int(health/100*200)
     pygame.draw.rect(screen, (255, 255, 255), (495, 45, 260, 35))
-    pygame.draw.rect(screen, red, (500,50,enemy_hp/20*250,25))
+    pygame.draw.rect(screen, red, (500, 50, enemy_hp / 20 * 250, 25))
 
 
 def player(x, y):
@@ -81,6 +85,7 @@ def fire_bullet(x, y):
     bullet_state = "fire"
     screen.blit(bulletImg, (x + 16, y + 10))
     pygame.mixer.Sound.play(shooting_sound)
+
 
 # pygame.mixer.music.stop()
 
@@ -99,26 +104,35 @@ def obstacle(obs_startx, obs_starty):
 
 
 #asteroid function
-aIMG = pygame.image.load("asteroid.png")
 
 
-def asteroid_ob(a_x, a_y):
-    a_size = (40, 40)
+aIMG = pygame.image.load("annoyingOrange.png")
+def asteroid(a_x, a_y):
+  a_size = (70, 50)
 
-    a_pic = pygame.transform.scale(aIMG, a_size)
-    screen.blit(a_pic, (a_x, a_y))
+  a_pic = pygame.transform.scale(aIMG, a_size)
+  screen.blit(a_pic, (a_x, a_y))  
+
 
 def game_over():
-  end_screen = True
-  while end_screen:
-    screen.fill((0, 0, 0))
-    win = font.render("Congratulations", True, (255, 255, 255))
-    lose = font.render("GAME OVER", True, (255,255,255))
-    if lives ==0:
-      screen.blit(lose, (400, 400))
+    end_screen = True
+    while end_screen:
+        screen.fill((0, 0, 0))
+        win = font.render("Congratulations", True, (255, 255, 255))
+        lose = font.render("GAME OVER", True, (255, 255, 255))
+        if lives == 0:
+            screen.blit(lose, (400, 400))
+        if enemy_hp == 0:
+            screen.blit(win, (400, 400))
+        pygame.display.update()
+    if lives == 0:
+      pygame.mixer.Sound.play(loss_sound)
     if enemy_hp == 0:
-      screen.blit(win, (400,400))
-    pygame.display.update()
+      pygame.mixer.Sound.play(win_sound)
+      
+      
+
+
 #attempt moving asteroids
 
 # def isCollision(enemyX, enemyY, bulletX, bulletY):
@@ -128,20 +142,77 @@ def game_over():
 #         return True
 #     return Falseasds
 
+      
+#asteroids code
+left_right = random.randint(0,1)
+side = random.randint(0,1)
+a_x = 0
+a_y = 0
+if left_right == 0:
+    if side ==0:
+        a_x=0
+    else:
+        a_x=800
+    a_y = random.randint(0,800)
+else:
+    if side == 0:
+        a_y = 800
+    else:
+        a_y= 0
+    a_x = random.randint(0,800)
+
+new_asteroid = 0
+
 running = True
 obs_startx = random.randrange(0, 800)
 obs_starty = 60
-a_x = 250
-a_y = 100
+
 being_hit = False
 being_hit_copy = False
 
+being_hit_a = False
+being_hit_copy_a = False
+
 bg = pygame.image.load("background.png")
+
+life_
 while running:
-  #FRAME RATE
+    #FRAME RATE
     clock.tick(120)
     screen.fill((0, 0, 0))
-
+    #asteroid
+    if new_asteroid == 3:
+      left_right = random.randint(0, 1)
+      side = random.randint(0, 1)
+      if left_right == 0:
+          if side == 0:
+              a_x = 0
+          else:
+              a_x = 800
+          a_y = random.randint(0, 800)
+      else:
+          if side == 0:
+              a_y = 800
+          else:
+              a_y = 0
+          a_x = random.randint(0, 800)
+          new_asteroid = 0
+    if new_asteroid == 0:
+      ax_change = (playerX - a_x)/100
+      ay_change = (playerY - a_y)/100
+      new_asteroid = 1
+    if a_x > 800 or a_x < 0 or a_y >800 or a_y<0:
+        new_asteroid = 3
+    asteroid(a_x, a_y)
+    a_x += ax_change
+    a_y += ay_change
+    if 50 > math.sqrt((math.pow(playerX -(a_x), 2) + math.pow(playerY - a_y, 2))):
+      being_hit_a = True
+      if being_hit_copy_a == False:
+            lives -= 1
+    else:
+        being_hit_a = False
+        being_hit_copy_a = False
     # screen.blit(bg, (0,0))
     obstacle_speed = 10
     obs = 0
@@ -150,26 +221,20 @@ while running:
     obs_width = 80
     obs_height = 80
 
-    if enemyX <= 20 or enemyX >= 580:
-        enemyDirection *= -1
-        enemySpeed_x = random.randrange(0, 8) * enemyDirection
-        enemySpeed_y = random.randrange(0, 8) * enemyDirection
+    pos = int(1600/3)
+    if enemyX == pos & enemySpeed_x > 0:
+        print("test")
+        if random.randint(0,5) == 0:
+          enemySpeed_x *= -1
 
-        if enemySpeed_x == 0 and enemySpeed_x == 0:
-          enemySpeed_x = random.randrange(2, 8) * enemyDirection
-          enemySpeed_y = random.randrange(2, 8) * enemyDirection
-
-    if enemyY <= 70 or enemyY >= 150:
-      enemyDirection *= -1
-      enemySpeed_x = random.randrange(0, 8) * enemyDirection
-      enemySpeed_y = random.randrange(4, 8) * enemyDirection
-
-      if enemySpeed_x == 0 and enemySpeed_y == 0:
-           enemySpeed_x = random.randrange(2, 8) * enemyDirection
-           enemySpeed_y = random.randrange(4, 8) * enemyDirection
+    if enemyX <= 20 or enemyX >= 600:
+        enemySpeed_x *= -1
+    if enemyY <=20 or enemyY >=150:
+        enemySpeed_y *=-1
 
     enemyX += enemySpeed_x
     enemyY += enemySpeed_y
+   
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -224,15 +289,14 @@ while running:
     display_lives()
 
     #asteroid position
-    asteroid_ob(a_x, a_y)
+    #asteroid_ob(a_x, a_y)
 
-    
     obstacle(obs_startx, obs_starty)
     obs_starty += obstacle_speed
 
     if obs_starty > 800:
-        obs_startx = random.randrange(enemyX - 30, enemyX + 30)
-        obs_starty = enemyY+30
+        obs_startx = random.randrange((enemyX + 100) - 50, (enemyX + 100) + 50)
+        obs_starty = enemyY + 30
     if 50 > math.sqrt(
         (math.pow(playerX -
                   (obs_startx), 2) + math.pow(playerY - obs_starty, 2))):
@@ -243,13 +307,12 @@ while running:
         being_hit = False
         being_hit_copy = False
 
-    if lives == 0 or enemy_hp == 0: 
-      running = False
-      game_over()
-      
+    if lives == 0 or enemy_hp == 0:
+        running = False
+        game_over()
+
     being_hit_copy = being_hit
-    
+    being_hit_copy_a = being_hit_a
+
     pygame.display.update()
     #End of Loop
-
-
