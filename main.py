@@ -39,7 +39,8 @@ bulletY = playerY
 bulletY_change = 10
 bullet_state = "ready"
 
-enemy_hp = 100
+# enemy_hp = 100
+enemy_hp = 20
 font = pygame.font.Font('freesansbold.ttf', 32)
 
 textX = 10
@@ -52,7 +53,7 @@ livesImg = pygame.image.load('lives.png')
 def display_lives():
     global lives
     startX = 10
-    startY = 50
+    startY = 10
     for i in range(lives):
         screen.blit(livesImg, (startX, startY))
         startX += 50
@@ -64,7 +65,7 @@ def show_hp():
     screen.blit(health, (500, 10))
     #display_health = int(health/100*200)
     pygame.draw.rect(screen, (255, 255, 255), (495, 45, 260, 35))
-    pygame.draw.rect(screen, red, (500,50,enemy_hp/100*250,25))
+    pygame.draw.rect(screen, red, (500,50,enemy_hp/20*250,25))
 
 
 def player(x, y):
@@ -107,7 +108,17 @@ def asteroid_ob(a_x, a_y):
     a_pic = pygame.transform.scale(aIMG, a_size)
     screen.blit(a_pic, (a_x, a_y))
 
-
+def game_over():
+  end_screen = True
+  while end_screen:
+    screen.fill((0, 0, 0))
+    win = font.render("Congratulations", True, (255, 255, 255))
+    lose = font.render("GAME OVER", True, (255,255,255))
+    if lives ==0:
+      screen.blit(lose, (400, 400))
+    if enemy_hp == 0:
+      screen.blit(win, (400,400))
+    pygame.display.update()
 #attempt moving asteroids
 
 # def isCollision(enemyX, enemyY, bulletX, bulletY):
@@ -115,7 +126,7 @@ def asteroid_ob(a_x, a_y):
 #         (enemyX + 60) - bulletX, 2) + math.pow(enemyY - bulletY, 2)))
 #     if distance < 100:
 #         return True
-#     return False
+#     return Falseasds
 
 running = True
 obs_startx = random.randrange(0, 800)
@@ -163,7 +174,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 playerX_change = -6
@@ -174,7 +184,7 @@ while running:
             if event.key == pygame.K_s:
                 playerY_change = 6
             if event.key == pygame.K_SPACE:
-                fire_bullet(playerX + 3 * playerX_change,
+                fire_bullet(enemyX + 3 * playerX_change,
                             playerY + 2 * playerY_change)
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_a or event.key == pygame.K_d:
@@ -221,8 +231,8 @@ while running:
     obs_starty += obstacle_speed
 
     if obs_starty > 800:
-        obs_startx = random.randrange(playerX - 30, playerX + 30)
-        obs_starty = 100
+        obs_startx = random.randrange(enemyX - 30, enemyX + 30)
+        obs_starty = enemyY+30
     if 50 > math.sqrt(
         (math.pow(playerX -
                   (obs_startx), 2) + math.pow(playerY - obs_starty, 2))):
@@ -232,5 +242,14 @@ while running:
     else:
         being_hit = False
         being_hit_copy = False
+
+    if lives == 0 or enemy_hp == 0: 
+      running = False
+      game_over()
+      
     being_hit_copy = being_hit
+    
     pygame.display.update()
+    #End of Loop
+
+
